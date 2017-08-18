@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhiboer.mall.dao.RequireRepository">
+
+    <resultMap id="requireMap" type="com.zhiboer.mall.model.Require">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="order_code" property="orderCode" jdbcType="VARCHAR"/>
+        <result column="shop_name" property="shopName" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="contact_way" property="contactWay" jdbcType="VARCHAR"/>
+        <result column="contact_user" property="contactUser" jdbcType="VARCHAR"/>
+        <result column="goods_info" property="goodsInfo" jdbcType="VARCHAR"/>
+        <result column="kind" property="kind" jdbcType="VARCHAR"/>
+        <result column="count" property="count" jdbcType="INTEGER"/>
+        <result column="money" property="money" jdbcType="DOUBLE"/>
+        <result column="state" property="state" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="create_user" property="createUser" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="update_user" property="updateUser" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insertOne" parameterType="com.zhiboer.mall.model.Require">
+        INSERT INTO t_require(id, address, contact_user, contact_way, "count", create_time, create_user, goods_info, kind, money, order_code, shop_name, state, update_time, update_user)
+        VALUES (#{id},#{address},#{contactUser},#{contactWay},#{count},#{createTime},#{createUser},#{goodsInfo},#{kind},#{money},#{orderCode},#{shopName},#{state},#{updateTime},#{updateUser})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO t_require(id, address, contact_user, contact_way, `count`, create_time, create_user, goods_info, kind, money, order_code, shop_name, state, update_time, update_user)
+        VALUES
+        <foreach collection="list" item="require" index="index" separator=",">
+            (#{require.id},#{require.address},#{require.contactUser},#{require.contactWay},#{require.count},#{require.createTime},#{require.createUser},#{require.goodsInfo},#{require.kind},#{require.money},#{require.orderCode},#{require.shopName},#{require.state},#{require.updateTime},#{require.updateUser})
+        </foreach>
+    </insert>
+
+    <select id="selectAll" resultMap="requireMap">
+        SELECT * FROM t_require t
+        ORDER BY t.create_time DESC
+    </select>
+
+    <select id="selectByLike" parameterType="Require" resultMap="requireMap">
+        SELECT * FROM t_require t
+        <where>
+            <if test="shopName != ''">
+                shop_name LIKE '%${shopName}%'
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM t_require
+        WHERE id=#{id}
+    </delete>
+
+    <update id="updateById" parameterType="Require">
+        UPDATE t_require
+    </update>
+</mapper>

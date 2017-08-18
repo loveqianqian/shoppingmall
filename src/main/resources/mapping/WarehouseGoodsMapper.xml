@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhiboer.mall.dao.WarehouseGoodsRepository">
+
+    <resultMap id="warehouseGoodsMap" type="com.zhiboer.mall.model.WarehouseGoods">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="goods_code" property="goodsCode" jdbcType="VARCHAR"/>
+        <result column="goods_name" property="goodsName" jdbcType="VARCHAR"/>
+        <result column="goods_scale" property="goodsScale" jdbcType="VARCHAR"/>
+        <result column="unit" property="unit" jdbcType="VARCHAR"/>
+        <result column="sell_price" property="sellPrice" jdbcType="DOUBLE"/>
+        <result column="stock" property="stock" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="create_user" property="createUser" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="update_user" property="updateUser" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insertOne" parameterType="com.zhiboer.mall.model.WarehouseGoods">
+        INSERT INTO t_warehouse_goods(id, create_time, create_user, goods_code, goods_name, goods_scale, sell_price, stock, unit, update_time, update_user)
+        VALUES (#{id},#{createTime},#{createUser},#{goodsCode},#{goodsName},#{goodsScale},#{sellPrice},#{stock},#{unit},#{updateTime},#{updateUser})
+    </insert>
+
+    <select id="selectAll" resultMap="warehouseGoodsMap">
+        SELECT * FROM t_warehouse_goods wg
+        ORDER BY wg.create_time DESC
+    </select>
+
+    <select id="selectByLike" parameterType="com.zhiboer.mall.dto.GoodsDto" resultMap="warehouseGoodsMap">
+        SELECT * FROM t_warehouse_goods wg
+        <where>
+            <if test="goodsCode != '' and goodsCode != null">
+                goods_code = #{goodsCode}
+            </if>
+            <if test="goodsName != '' and goodsName != null">
+                AND goods_name LIKE '%${goodsName}%'
+            </if>
+            <if test="startTime != '' and startTime != null">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d') &gt;= #{startTime}
+            </if>
+            <if test="startTime != '' and startTime != null">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM t_warehouse_goods wg
+        WHERE id=#{id}
+    </delete>
+
+    <update id="updateById" parameterType="WarehouseGoods">
+        UPDATE t_warehouse_goods wg
+        SET goods_count=#{goodsCount}, address=#{address}, contract_user=#{contractUser}, money_count=#{moneyCount}, state=#{state}, update_time=#{updateTime}, update_user=#{updateUser}
+        WHERE id=#{id}
+    </update>
+</mapper>

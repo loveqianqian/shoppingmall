@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhiboer.mall.dao.ChuUserRepository">
+
+    <resultMap id="chuUserMap" type="com.zhiboer.mall.model.ChuUser">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="id_card" property="idCard" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="INTEGER"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="gender" property="gender" jdbcType="VARCHAR"/>
+        <result column="phone_num" property="phoneNum" jdbcType="VARCHAR"/>
+        <result column="real_name" property="realName" jdbcType="VARCHAR"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="role_code" property="roleCode" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="VARCHAR"/>
+        <result column="login_time" property="loginTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="create_user" property="createUser" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="update_user" property="updateUser" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insertOne" parameterType="com.zhiboer.mall.model.ChuUser">
+        INSERT INTO t_chu_user(id, id_card, address, age, create_time, create_user, gender, login_time, password, phone_num, real_name, role_code, state, update_time, update_user, user_name)
+          VALUES (#{id},#{idCard},#{address},#{age},#{createTime},#{createUser},#{gender},#{loginTime},#{password},#{phoneNum},#{realName},#{roleCode},#{state},#{updateTime},#{updateUser},#{userName})
+    </insert>
+
+    <select id="selectAll" resultMap="chuUserMap">
+        SELECT * FROM t_chu_user cu
+        ORDER BY cu.create_time DESC
+    </select>
+
+    <select id="selectByLike" parameterType="ChuUser" resultMap="chuUserMap">
+        SELECT * FROM t_chu_user cu
+        <where>
+            <if test="userName != ''">
+                user_name LIKE '%${userName}%'
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM t_chu_user
+        WHERE id=#{id}
+    </delete>
+
+    <update id="updateById" parameterType="ChuUser">
+        UPDATE t_chu_user
+        SET id_card=#{idCard}, address=#{address}, age=#{age}, create_time=#{createTime}, create_user=#{createUser}, gender=#{gender}, login_time=#{loginTime},
+            password=#{password}, phone_num=#{phoneNum}, real_name=#{realName}, role_code=#{roleCode}, state=#{state}, update_time=#{updateTime}, update_user=#{updateUser}, user_name=#{userName}
+        WHERE id=#{id}
+    </update>
+</mapper>

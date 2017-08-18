@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                        http://www.springframework.org/schema/mvc
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+                        http://www.springframework.org/schema/tx
+                        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--注解驱动-->
+    <mvc:annotation-driven />
+
+     <!--自动扫描  @Controller-->
+    <context:component-scan base-package="com.zhiboer.mall.controller"/>
+    <context:component-scan base-package="com.zhiboer.mall.dao"/>
+    <context:component-scan base-package="com.zhiboer.mall.service"/>
+    <context:component-scan base-package="com.zhiboer.mall.utils"/>
+    <context:component-scan base-package="com.zhiboer.mall.model"/>
+    <!-- 配置自动扫描的包 -->
+    <!-- 主要扫描@Service -->
+    <!--<context:component-scan base-package="com">-->
+        <!--<context:exclude-filter type="annotation"-->
+                                <!--expression="org.springframework.stereotype.Controller" />-->
+        <!--<context:exclude-filter type="annotation"-->
+                                <!--expression="org.springframework.web.bind.annotation.ControllerAdvice" />-->
+    <!--</context:component-scan>-->
+
+    <!-- 对静态资源文件的访问 -->
+    <!--<mvc:resources mapping="/images/**" location="common/img/" />-->
+
+    <!--<mvc:default-servlet-handler/>-->
+
+    <!-- 第一种方式：加载一个properties文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:jdbc.properties"/>
+    </bean>
+    <!-- 配置数据源 -->
+    <!--<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">-->
+        <!--<property name="user" value="${username}"></property>-->
+        <!--<property name="password" value="${password}"></property>-->
+        <!--<property name="driverClass" value="${driverClass}"></property>-->
+        <!--<property name="jdbcUrl" value="${jdbcUrl}"></property>-->
+        <!--&lt;!&ndash; 配置其他属性 &ndash;&gt;-->
+        <!--&lt;!&ndash;连接池中保留的最大连接数。默认值: 15 &ndash;&gt;-->
+        <!--<property name="maxPoolSize" value="20"/>-->
+        <!--&lt;!&ndash; 连接池中保留的最小连接数，默认为：3&ndash;&gt;-->
+        <!--<property name="minPoolSize" value="2"/>-->
+        <!--&lt;!&ndash; 初始化连接池中的连接数，取值应在minPoolSize与maxPoolSize之间，默认为3&ndash;&gt;-->
+        <!--<property name="initialPoolSize" value="2"/>-->
+        <!--&lt;!&ndash;最大空闲时间，60秒内未使用则连接被丢弃。若为0则永不丢弃。默认值: 0 &ndash;&gt;-->
+        <!--<property name="maxIdleTime" value="0" />-->
+    <!--</bean>-->
+    <!-- 配置数据源 -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${driverClass}"/>
+        <property name="url" value="${jdbcUrl}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <!-- 初始化连接大小 -->
+        <property name="initialSize" value="${initialSize}" />
+        <!-- 连接池最大数量 -->
+        <property name="maxActive" value="${maxActive}"/>
+        <!-- 连接池最大空闲 -->
+        <property name="maxIdle" value="${maxIdle}"/>
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="${minIdle}"/>
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="${maxWait}"/>
+        <!--从数据库连接池中取得连接时，对其的有效性进行检查-->
+        <property name="testOnBorrow" value="true"/>
+        <!--用来检查的SQL语句，“select 1”执行较快，是一个不错的检测语句-->
+        <property name="validationQuery" value="select 1"/>
+        <property name="defaultAutoCommit" value="true" />
+    </bean>
+
+    <!-- mybatis和spring完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml" />
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:mapping/*.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zhiboer.mall.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!--避免IE执行AJAX时，返回JSON出现下载文件 -->
+    <bean id="mappingJacksonHttpMessageConverter"
+          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>text/html;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 启动SpringMVC的注解功能，完成请求和注解POJO的映射 -->
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="mappingJacksonHttpMessageConverter"/> <!-- JSON转换器 -->
+            </list>
+        </property>
+    </bean>
+
+
+    <!-- 定义跳转的文件的前后缀 ，视图模式配置 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 文件上传配置 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 默认编码 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 上传文件大小限制为31M，31*1024*1024 -->
+        <property name="maxUploadSize" value="10485760000"/>
+        <!-- 内存中的最大值 -->
+        <property name="maxInMemorySize" value="40960"/>
+    </bean>
+
+    <!-- 配置 JPA 的 EntityManagerFactory -->
+    <!--<bean id="entityManagerFactory"-->
+          <!--class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">-->
+        <!--<property name="dataSource" ref="dataSource"></property>-->
+        <!--<property name="jpaVendorAdapter">-->
+            <!--<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"></bean>-->
+        <!--</property>-->
+        <!--<property name="packagesToScan" value="com.zhiboer.mall.model"></property>-->
+        <!--<property name="jpaProperties">-->
+            <!--<props>-->
+                <!--<prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>-->
+                <!--<prop key="hibernate.hbm2ddl.auto">none</prop>-->
+                <!--&lt;!&ndash; <prop key="hibernate.hbm2ddl.auto">update</prop> &ndash;&gt;-->
+                <!--<prop key="hibernate.show_sql">true</prop>-->
+                <!--<prop key="hibernate.format_sql">true</prop>-->
+                <!--<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>-->
+                <!--&lt;!&ndash; <prop key="hibernate.cache.use_second_level_cache">true</prop> <prop-->
+                    <!--key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory-->
+                    <!--</prop> <prop key="hibernate.cache.use_query_cache">true</prop> <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop> &ndash;&gt;-->
+            <!--</props>-->
+        <!--</property>-->
+        <!--<property name="sharedCacheMode" value="ENABLE_SELECTIVE"></property>-->
+    <!--</bean>-->
+
+    <!-- 重要配置：启用扫描并自动创建代理的功能 -->
+    <!-- 主要扫描继承了Repository接口的接口 -->
+    <!--<jpa:repositories base-package="com.zhiboer.mall.dao"-->
+                      <!--entity-manager-factory-ref="entityManagerFactory" />-->
+</beans>

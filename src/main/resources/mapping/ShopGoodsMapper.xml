@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhiboer.mall.dao.ShopGoodsRepository">
+
+    <resultMap id="shopGoodsMap" type="com.zhiboer.mall.model.ShopGoods">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="goods_code" property="goodsCode" jdbcType="VARCHAR"/>
+        <result column="goods_name" property="goodsName" jdbcType="VARCHAR"/>
+        <result column="goods_scale" property="goodsScale" jdbcType="VARCHAR"/>
+        <result column="unit" property="unit" jdbcType="VARCHAR"/>
+        <result column="sell_price" property="sellPrice" jdbcType="DOUBLE"/>
+        <result column="stock" property="stock" jdbcType="INTEGER"/>
+        <result column="limit_stock" property="limitStock" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="create_user" property="createUser" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="update_user" property="updateUser" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insertOne" parameterType="com.zhiboer.mall.model.ShopGoods">
+        INSERT INTO t_shop_goods(id, create_time, create_user, goods_code, goods_name, goods_scale, limit_stock, sell_price, stock, unit, update_time, update_user)
+        VALUES (#{id},#{createTime},#{createUser},#{goodsCode},#{goodsName},#{goodsScale},#{limitStock},#{sellPrice},#{stock},#{unit},#{updateTime},#{updateUser})
+    </insert>
+
+    <insert id="insertBatch" parameterType="list">
+        INSERT INTO t_shop_goods(id, create_time, create_user, goods_code, goods_name, goods_scale, limit_stock, sell_price, stock, unit, update_time, update_user)
+        VALUES
+        <foreach collection="list" item="sg" index="index" separator=",">
+            (#{sg.id},#{sg.createTime},#{sg.createUser},#{sg.goodsCode},#{sg.goodsName},#{sg.goodsScale},#{sg.limitStock},#{sg.sellPrice},#{sg.stock},#{sg.unit},#{sg.updateTime},#{sg.updateUser})
+        </foreach>
+    </insert>
+
+    <select id="selectAll" resultMap="shopGoodsMap">
+        SELECT * FROM t_shop_goods sg
+        ORDER BY sg.create_time DESC
+    </select>
+
+    <select id="selectByLike" parameterType="com.zhiboer.mall.dto.GoodsDto" resultMap="shopGoodsMap">
+        SELECT * FROM t_shop_goods sg
+        <where>
+            <if test="goodsCode != '' and goodsCode != null">
+                goods_code = #{goodsCode}
+            </if>
+            <if test="goodsName != '' and goodsName != null">
+                AND goods_name LIKE '%${goodsName}%'
+            </if>
+            <if test="startTime != '' and startTime != null">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d') &gt;= #{startTime}
+            </if>
+            <if test="startTime != '' and startTime != null">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM t_shop_goods sg
+        WHERE id=#{id}
+    </delete>
+
+    <update id="updateById" parameterType="ShopGoods">
+        UPDATE t_shop_goods sg
+        SET goods_count=#{goodsCount}, address=#{address}, contract_user=#{contractUser}, money_count=#{moneyCount}, state=#{state}, update_time=#{updateTime}, update_user=#{updateUser}
+        WHERE id=#{id}
+    </update>
+</mapper>
